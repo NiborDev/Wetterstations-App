@@ -1,0 +1,23 @@
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright (c) 2022.                                                                           ~
+  ~ NiborBloG - niborblog.de (Robin Fey)                                                          ~
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+  <group android:scaleX="0.12013483"
+      android:scaleY="0.12013483"
+      android:translateX="27.27"
+      android:translateY="33.32958">
+    <path
+        android:pathData="M18.16,18.67C25.2,103.51 48.49,272.8 85.33,271.17C131.38,269.14 159.97,43.68 213.15,53.05C282.81,65.34 251.89,281.42 286.23,306.6C350.08,353.39 399.34,284.25 398.49,257.34C396.34,188.93 321.11,165.09 314.71,145.09C295.06,83.74 385.89,58.13 426.62,97.8"
+        android:strokeWidth="36"
+        android:fillColor="#00000000"
+        android:strokeColor="#00AC7A"
+        android:strokeLineCap="round"/>
+  </group>
+</vector>
