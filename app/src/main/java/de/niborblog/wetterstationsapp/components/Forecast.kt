@@ -7,17 +7,23 @@
 package de.niborblog.wetterstationsapp.components
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
 import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -27,7 +33,11 @@ import de.niborblog.wetterstationsapp.model.Forecast.WetterForecast
 import de.niborblog.wetterstationsapp.utils.formatDate
 import de.niborblog.wetterstationsapp.utils.formatDecimal
 import de.niborblog.wetterstationsapp.utils.getJsonDataFromAsset
-import org.joda.time.DateTime
+import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.util.Locale
+import java.time.format.TextStyle;
 
 /**
  *
@@ -35,6 +45,7 @@ import org.joda.time.DateTime
  *
  * */
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TodayForecast(
@@ -46,7 +57,7 @@ fun TodayForecast(
     val city = forecast.location.name;
     val region = forecast.location.region;
     val country = forecast.location.country;
-    val day = DateTime(forecast.forecast.forecastday[0].date).dayOfWeek()
+    val day = LocalDateTime.ofEpochSecond(1595363833, 0, ZoneOffset.UTC).dayOfWeek.getDisplayName(TextStyle.FULL, Locale.GERMAN); //DateTime(forecast.forecast.forecastday[0].date).dayOfWeek()
     val lastUpdated = formatDate(forecast.current.last_updated_epoch)
 
     /**
@@ -75,7 +86,7 @@ fun TodayForecast(
                 .padding(8.dp)
         ) {
             Text(
-                text = day.asText,
+                text = day,
                 modifier = Modifier
                     .fillMaxWidth(),
                 style = MaterialTheme.typography.titleLarge,
@@ -191,7 +202,7 @@ fun OutDoor(
             Column(
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
-                    .width(128.dp)
+                    .width(220.dp)
                     .padding(8.dp)
             ) {
                 Image(
@@ -207,15 +218,16 @@ fun OutDoor(
                     color = MaterialTheme.colorScheme.secondary,
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier
-                        .width(128.dp)
+                        .width(135.dp)
                 )
             }
             Text(
                 text = "$temp°C",
                 color = MaterialTheme.colorScheme.secondary,
-                style = TextStyle(
+                style = androidx.compose.ui.text.TextStyle(
                     fontSize = 72.sp,
-                    fontWeight = FontWeight.Bold),
+                    fontWeight = FontWeight.Bold
+                ),
                 modifier = Modifier.padding(8.dp)
             )
         }
@@ -227,5 +239,29 @@ fun OutDoor(
                 .fillMaxWidth()
                 .padding(8.dp),
         )
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun InDoor(
+){
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
+    )
+    val coroutineScope = rememberCoroutineScope()
+    BottomSheetScaffold(
+        scaffoldState = bottomSheetScaffoldState,
+        sheetContent = {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            ) {
+                Text(text = "Hello from sheet")
+            }
+        }, sheetPeekHeight = 320.dp
+    ) {
+
     }
 }
