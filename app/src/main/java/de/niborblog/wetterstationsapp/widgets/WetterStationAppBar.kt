@@ -6,25 +6,29 @@
 
 package de.niborblog.wetterstationsapp.components
 
-import android.app.Activity
+import android.annotation.SuppressLint
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import de.niborblog.wetterstationsapp.Bluetooth.BluetoothReceiver
+import de.niborblog.wetterstationsapp.Bluetooth.CheckBluetoothStatus
 import de.niborblog.wetterstationsapp.R
 
 /**
@@ -42,7 +46,7 @@ import de.niborblog.wetterstationsapp.R
 fun AppBar(
     title: String = "WetterStations App",
     city: String = "Haiger",
-    date: String = "Today, 08.12.2022"
+    date: String = "Today, 08.12.2022",
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -92,11 +96,13 @@ fun AppBar(
 
 }
 
+@SuppressLint("MissingPermission")
 @Composable
 fun AddNewDeviceButton(context: Context) {
+    var showCustomDialog by remember { mutableStateOf(false) }
     IconButton(
         onClick = {
-            BluetoothConnection(context = context )
+            showCustomDialog = true
         }
     ) {
         Image(
@@ -104,5 +110,8 @@ fun AddNewDeviceButton(context: Context) {
             contentDescription = "Add Location",
             modifier = Modifier
                 .size(size = 32.dp))
+    }
+    if (showCustomDialog) {
+        DevicePairDialog(onClose = { showCustomDialog = false })
     }
 }

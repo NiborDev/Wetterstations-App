@@ -6,12 +6,13 @@
 
 package de.niborblog.wetterstationsapp.Screens
 
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.bluetooth.BluetoothDevice
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.produceState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
@@ -27,6 +28,7 @@ import java.time.ZoneOffset
 import java.time.format.TextStyle
 import java.util.*
 
+@SuppressLint("UnrememberedMutableState")
 @Destination
 @Composable
 fun HomeScreen(
@@ -57,6 +59,8 @@ fun HomeScreen(
         val date = "$day, $dayOfMonth.$month.$year"
         MainContent(weatherData = weather.data!!, city= city, dateString = date)
     }
+
+
 
 
 }

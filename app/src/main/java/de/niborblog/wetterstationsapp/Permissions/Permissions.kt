@@ -1,3 +1,9 @@
+
+/**************************************************************************************************
+ * Copyright (c) 2022.                                                                            *
+ * NiborBloG - niborblog.de (Robin Fey)                                                           *
+ **************************************************************************************************/
+
 /**************************************************************************************************
  * Copyright (c) 2022.                                                                            *
  * NiborBloG - niborblog.de (Robin Fey)                                                           *
@@ -12,14 +18,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.semantics.Role.Companion.Button
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
 
 //TODO: Design überarbeiten!!
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun BluetoothPermissions(
-    multiplePermissionsState: MultiplePermissionsState
+    multiplePermissionsList: List<String>
 ) {
+    val multiplePermissionsState =
+        rememberMultiplePermissionsState(permissions = multiplePermissionsList)
     if (multiplePermissionsState.allPermissionsGranted) {
         Text(text = "Alle Berechtigungen akzeptiert!")
 
