@@ -11,4 +11,5 @@ object Constants {
     const val API_KEY = "00c162b831094bb9b65172119222304"
     const val LANG = "de"
     const val HARDWARE_NAME = "WetterStation by M&R"
+    const val SCAN_PERIOD = 1000L
 }

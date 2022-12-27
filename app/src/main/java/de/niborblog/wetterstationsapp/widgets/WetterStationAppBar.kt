@@ -7,13 +7,7 @@
 package de.niborblog.wetterstationsapp.components
 
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -27,8 +21,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import de.niborblog.wetterstationsapp.Bluetooth.BluetoothReceiver
-import de.niborblog.wetterstationsapp.Bluetooth.CheckBluetoothStatus
 import de.niborblog.wetterstationsapp.R
 
 /**

@@ -74,6 +74,7 @@ fun WetterStationsApp(
             Column {
                 //Request Bluetooth Berechtigungen
                 BluetoothPermissions(multiplePermissionsList = multiplePermissionsList)
+                //TODO: Check if Location Enabled
                 CheckBluetoothStatus()
 
                 WetterSNavigation()
