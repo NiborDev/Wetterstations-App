@@ -8,11 +8,7 @@ package de.niborblog.wetterstationsapp.components
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.le.ScanCallback
-import android.bluetooth.le.ScanFilter
-import android.bluetooth.le.ScanResult
-import android.bluetooth.le.ScanSettings
-import android.os.Handler
+import android.net.wifi.ScanResult
 import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -26,13 +22,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.*
 import de.niborblog.wetterstationsapp.Bluetooth.connectToDevice
 import de.niborblog.wetterstationsapp.Bluetooth.scanLeDevice
-import de.niborblog.wetterstationsapp.utils.Constants.SCAN_PERIOD
+import de.niborblog.wetterstationsapp.Wifi.scanNetworks
 
 val bluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 val bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
@@ -40,10 +35,13 @@ var discoveredDevices = mutableStateListOf<BluetoothDevice>()
 
 var isNotEmpty = mutableStateOf(false)
 
+var discNetworks = mutableStateListOf<ScanResult>()
+var isNetworksEmpty = mutableStateOf(false)
+
 
 @SuppressLint("MissingPermission")
 @Composable
-fun DevicePairDialog(onClose: () -> Unit) {
+fun DevicePairDialog(onClose: () -> Unit, openSettingsDialog: () -> Unit) {
 
     //set BluetoothReceiver
     /*val receiver = BluetoothReceiver()
@@ -72,7 +70,7 @@ fun DevicePairDialog(onClose: () -> Unit) {
                 Text(text = "WetterStationen Verbinden\n", fontSize = MaterialTheme.typography.titleMedium.fontSize, fontWeight = MaterialTheme.typography.titleMedium.fontWeight)
                 Divider(modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
                 if (isNotEmpty.value){
-                    BluetoothDevices()
+                    BluetoothDevices(close = onClose, openSettingsDialog = openSettingsDialog)
                 }else {
                     Text(modifier = Modifier.fillMaxHeight(),text = "Suche nach WetterStationen...")
                 }
@@ -87,12 +85,6 @@ fun DevicePairDialog(onClose: () -> Unit) {
                 Button(onClick = onClose) {
                     Text(text = "Schließen")
                 }
-                Button(
-                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color.Green),
-                    enabled = isNotEmpty.value,
-                onClick = {/* TODO: */ }) {
-                Text(text = "Verbinden")
-            }
             }
         })
     if (discoveredDevices.isNotEmpty()){
@@ -100,9 +92,99 @@ fun DevicePairDialog(onClose: () -> Unit) {
     }
 }
 
+@Composable
+fun WifiSettingsDialog(onClose: () -> Unit) {
+    //TODO: SCann Wifi Geräte und deren SSID
+
+    scanNetworks(context = LocalContext.current)
+
+    AlertDialog(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(450.dp),
+        onDismissRequest = {},
+        text = {
+            Column(modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center) {
+                Text(text = "WetterStationen Einrichten\n", fontSize = MaterialTheme.typography.titleMedium.fontSize, fontWeight = MaterialTheme.typography.titleMedium.fontWeight)
+                Divider(modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
+                if (isNetworksEmpty.value){
+                    //TODO: List Networks
+                    WiFiNetworks(onClose = onClose)
+                }else {
+                    Text(modifier = Modifier.fillMaxHeight(),text = "Suche nach Netzwerke...")
+                }
+            }
+
+        }, buttons = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Button(onClick = onClose) {
+                    Text(text = "Schließen")
+                }
+            }
+        })
+    if (discNetworks.isNotEmpty()){
+        isNetworksEmpty.value = true
+    }
+}
+
+@Composable
+fun WiFiNetworks(onClose: () -> Unit) {
+    val networkList = remember {
+        discNetworks
+    }.sortedBy { -it.level }
+    var selectedIndex by remember {
+        mutableStateOf(0)
+    }
+    val onItemClick = {index: Int -> selectedIndex = index}
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+    ) {
+        itemsIndexed(networkList) { index, network ->
+            NetworkItem(network = network, index = index, selected = selectedIndex == index, onClick = onItemClick, onClose = onClose )
+            Divider()
+        }
+    }
+}
+
+@Composable
+fun NetworkItem(
+    network: ScanResult,
+    index: Int,
+    selected: Boolean,
+    onClick: (Int) -> Unit,
+    onClose: () -> Unit
+) {
+    val context = LocalContext.current
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .height(35.dp)
+        .clickable {
+            Log.d(
+                "NetworkItemClicked",
+                "NetworkIndex:$index - NetworkSSID: ${network.SSID}"
+            )
+            //TODO: Send SSID to Arduino
+            //TODO: Request Network Password (Change UI to insert Network Password)
+        }
+    ) {
+        Text(text = network.SSID)
+    }
+    Log.d("NetworkList", network.SSID)
+}
+
 @SuppressLint("MissingPermission")
 @Composable
-fun BluetoothDevices() {
+fun BluetoothDevices(close: () -> Unit, openSettingsDialog: () -> Unit) {
     val deviceList = remember { discoveredDevices }
     var selectIndex by remember{mutableStateOf(0)}
     val onItemClick = {index: Int -> selectIndex = index}
@@ -112,15 +194,22 @@ fun BluetoothDevices() {
             .fillMaxHeight()
     ) {
         itemsIndexed(deviceList) { index, device ->
-            DeviceItem(device = device, index = index, selected = selectIndex == index, onClick = onItemClick )
-
+            DeviceItem(device = device, index = index, selected = selectIndex == index, onClick = onItemClick, onClose = close, openSettingsDialog = openSettingsDialog )
+            Divider()
         }
     }
 }
 
 @SuppressLint("MissingPermission")
 @Composable
-fun DeviceItem(device: BluetoothDevice, index: Int, selected: Boolean, onClick: (Int) -> Unit){
+fun DeviceItem(
+    device: BluetoothDevice,
+    index: Int,
+    selected: Boolean,
+    onClick: (Int) -> Unit,
+    onClose: () -> Unit,
+    openSettingsDialog: () -> Unit
+){
     val context = LocalContext.current
     Column(modifier = Modifier
         .fillMaxWidth()
@@ -131,7 +220,12 @@ fun DeviceItem(device: BluetoothDevice, index: Int, selected: Boolean, onClick: 
                 "DeviceIndex:$index - DeviceName: ${device.name}"
             )
             bluetoothAdapter.cancelDiscovery()
-            connectToDevice(device, context = context)
+            connectToDevice(
+                device,
+                context = context,
+                onClose = onClose,
+                openSettingsDialog = openSettingsDialog
+            )
         }
     ) {
         Text(text = "${device.name}")

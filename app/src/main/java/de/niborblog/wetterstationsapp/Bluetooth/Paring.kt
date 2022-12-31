@@ -17,6 +17,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Handler
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +26,8 @@ import androidx.compose.ui.platform.LocalContext
 import de.niborblog.wetterstationsapp.components.*
 import de.niborblog.wetterstationsapp.utils.Constants
 import java.util.*
+
+var error = false
 
 val scanCallback = object : ScanCallback() {
     @SuppressLint("MissingPermission")
@@ -64,9 +67,11 @@ val bluetoothGattCallback = object : BluetoothGattCallback() {
             // The device is connected, discover its services
             Log.i("BluetoothGatt", "Device connected - search Services")
             gatt.discoverServices()
+            error = false
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
             // The device is disconnected
             Log.i("BluetoothGatt", "Device disconnected")
+            error = true
         }
     }
     @SuppressLint("MissingPermission")
@@ -77,9 +82,11 @@ val bluetoothGattCallback = object : BluetoothGattCallback() {
             val service = gatt.getService(UUID.fromString("280e14dd-6d9f-48db-9282-948e27efea5a"))
             val characteristic = service.getCharacteristic(UUID.fromString("99448029-6429-4271-aff0-abe68bc84697"))
             gatt.readCharacteristic(characteristic)
+            error = false
         } else {
             // There was an error discovering the services
             Log.e("BluetoothGatt", "Services discovering error!")
+            error = true
         }
     }
 
@@ -88,16 +95,19 @@ val bluetoothGattCallback = object : BluetoothGattCallback() {
             // The characteristic value was read, update the UI
             Log.i("BluetoothGatt", "Characteristic value was read")
             val value = characteristic.value
+            error = false
         } else {
             // There was an error reading the characteristic value
             Log.e("BluetoothGatt", "Reading characteristic error!")
-
+            error = true
         }
     }
 }
 
 private var scanning = false
 private val handler = Handler()
+
+
 
 @SuppressLint("UnrememberedMutableState", "MissingPermission")
 @Composable
@@ -158,6 +168,17 @@ fun scanLeDevice() {
 }
 
 @SuppressLint("MissingPermission")
-fun connectToDevice(device: BluetoothDevice, context: Context) {
+fun connectToDevice(
+    device: BluetoothDevice,
+    context: Context,
+    openSettingsDialog: () -> Unit,
+    onClose: () -> Unit
+) {
     device.connectGatt(context, false, bluetoothGattCallback)
+    if (!error){
+        openSettingsDialog.invoke()
+        onClose.invoke()
+    }else {
+        Toast.makeText(context,"Fehler beim Verbinden mit der WetterStation!",Toast.LENGTH_LONG).show()
+    }
 }

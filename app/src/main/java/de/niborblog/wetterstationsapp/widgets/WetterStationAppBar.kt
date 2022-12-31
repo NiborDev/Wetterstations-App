@@ -91,10 +91,12 @@ fun AppBar(
 @SuppressLint("MissingPermission")
 @Composable
 fun AddNewDeviceButton(context: Context) {
-    var showCustomDialog by remember { mutableStateOf(false) }
+    var showBLEDialog by remember { mutableStateOf(false) }
+    var showWIFISettingsDialog by remember { mutableStateOf(false) }
+
     IconButton(
         onClick = {
-            showCustomDialog = true
+            showBLEDialog = true
         }
     ) {
         Image(
@@ -103,7 +105,10 @@ fun AddNewDeviceButton(context: Context) {
             modifier = Modifier
                 .size(size = 32.dp))
     }
-    if (showCustomDialog) {
-        DevicePairDialog(onClose = { showCustomDialog = false })
+    if (showBLEDialog) {
+        DevicePairDialog(onClose = { showBLEDialog = false }, openSettingsDialog = {showWIFISettingsDialog = true})
+    }
+    if (showWIFISettingsDialog) {
+        WifiSettingsDialog(onClose = { showWIFISettingsDialog = false })
     }
 }
