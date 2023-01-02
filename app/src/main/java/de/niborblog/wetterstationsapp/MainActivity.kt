@@ -7,6 +7,7 @@ package de.niborblog.wetterstationsapp
 
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -17,14 +18,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
-import de.niborblog.wetterstationsapp.Bluetooth.CheckBluetoothStatus
+import de.niborblog.wetterstationsapp.Bluetooth.*
 import de.niborblog.wetterstationsapp.components.BluetoothPermissions
 import de.niborblog.wetterstationsapp.navigation.WetterSNavigation
 import de.niborblog.wetterstationsapp.ui.theme.WetterstationsAppTheme
 
-
+@SuppressLint("StaticFieldLeak")
+var context: Context? = null;
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
@@ -54,12 +57,18 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         setContent()
         {
+            context = LocalContext.current
             WetterStationsApp(multiplePermissionsList = multiplePermissionsList)
         }
 
     }
-}
 
+    override fun onDestroy() {
+        super.onDestroy()
+        disconnectFromDevice()
+    }
+
+}
 
 @SuppressLint("MissingPermission")
 @Composable
@@ -75,8 +84,12 @@ fun WetterStationsApp(
                 //Request Bluetooth Berechtigungen
                 BluetoothPermissions(multiplePermissionsList = multiplePermissionsList)
                 //TODO: Check if Location Enabled
+                //Bluetooth configurations
                 CheckBluetoothStatus()
+                initializeBluetooth(LocalContext.current)
+                startScanning(LocalContext.current)
 
+                //Show Screen
                 WetterSNavigation()
             }
         }

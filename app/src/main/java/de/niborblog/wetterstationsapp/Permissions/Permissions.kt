@@ -11,10 +11,11 @@
 
 package de.niborblog.wetterstationsapp.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.semantics.Role.Companion.Button
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
@@ -27,28 +28,19 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 fun BluetoothPermissions(
     multiplePermissionsList: List<String>
 ) {
+    var showPermDialog by remember { mutableStateOf(false) }
+
     val multiplePermissionsState =
         rememberMultiplePermissionsState(permissions = multiplePermissionsList)
     if (multiplePermissionsState.allPermissionsGranted) {
-        Text(text = "Alle Berechtigungen akzeptiert!")
+        Log.d("PERMISSIONS","All PermissionsGranted!")
 
     } else {
-        Column {
-            val textToShow = if (multiplePermissionsState.shouldShowRationale) {
-                // If the user has denied the permission but the rationale can be shown,
-                // then gently explain why the app requires this permission
-                "Die Folgende Berechtigungen sind notwenig, um die WetterStations Proplemlos einzurichten!"
-            } else {
-                // If it's the first time the user lands on this feature, or the user
-                // doesn't want to be asked again for this permission, explain that the
-                // permission is required
-                "Es sind Bluetooth, GPS berechtigungen erforderlich\n" +
-                        "Bitte Akzeptieren sie die Berechtigungen!"
+        do {
+            PermissionRequestDialog {
+                multiplePermissionsState.launchMultiplePermissionRequest()
+                showPermDialog = false
             }
-            Text(textToShow)
-            Button(onClick = { multiplePermissionsState.launchMultiplePermissionRequest() }) {
-                Text("Berechtigungen Anfragen")
-            }
-        }
+        }while (showPermDialog)
     }
 }

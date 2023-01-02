@@ -7,10 +7,7 @@ package de.niborblog.wetterstationsapp.Bluetooth
 
 import android.annotation.SuppressLint
 import android.bluetooth.*
-import android.bluetooth.le.ScanCallback
-import android.bluetooth.le.ScanFilter
-import android.bluetooth.le.ScanResult
-import android.bluetooth.le.ScanSettings
+import android.bluetooth.le.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -23,18 +20,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import dagger.hilt.android.qualifiers.ApplicationContext
 import de.niborblog.wetterstationsapp.components.*
 import de.niborblog.wetterstationsapp.utils.Constants
 import java.util.*
 
+
 var error = false
+
 
 val scanCallback = object : ScanCallback() {
     @SuppressLint("MissingPermission")
     override fun onScanResult(callbackType: Int, result: ScanResult) {
         val device = result.device
-        // Add the device to the list of devices
-        if (device.name != null) {
+        // Add the WetterStation to the list of devices
+
+        //Planned to connect with WIFI but ESP32 board hav not enaugh space for WIFI library with Bluetooth library
+        if (device.name != null && device.name == "WetterStation by M&R") {
             if (!discoveredDevices.contains(device)){
                 Log.d("BluetoothLE","Direct: Add ${device.name} to discoveredDevices List")
                 discoveredDevices.add(device)
@@ -45,8 +47,8 @@ val scanCallback = object : ScanCallback() {
     override fun onBatchScanResults(results: List<ScanResult>) {
         for (result in results) {
             val device = result.device
-            // Add the device to the list of devices
-            if (device.name != null) {
+            // Add the WetterStation to the list of devices
+            if (device.name != null  && device.name == "WetterStation by M&R") {
                 if (!discoveredDevices.contains(device)){
                     Log.d("BluetoothLE","BATCH: Add ${device.name} to discoveredDevices List")
                     discoveredDevices.add(device)
@@ -95,6 +97,7 @@ val bluetoothGattCallback = object : BluetoothGattCallback() {
             // The characteristic value was read, update the UI
             Log.i("BluetoothGatt", "Characteristic value was read")
             val value = characteristic.value
+            Log.d("BluetoothValue", value.toString())
             error = false
         } else {
             // There was an error reading the characteristic value
@@ -159,7 +162,7 @@ fun scanLeDevice() {
         }, Constants.SCAN_PERIOD)
         Log.d("BluetoothLE","Scanning running...")
         scanning = true
-        bluetoothLeScanner.startScan(listOf(scanFilter),scanSettings, scanCallback)
+        bluetoothLeScanner?.startScan(listOf(scanFilter),scanSettings, scanCallback)
     }else{
         Log.d("BluetoothLE","Scanning stoped")
         scanning = false
@@ -167,6 +170,8 @@ fun scanLeDevice() {
     }
 }
 
+
+//used to show WIFI Networks for older Idea to transfer Weather Data
 @SuppressLint("MissingPermission")
 fun connectToDevice(
     device: BluetoothDevice,

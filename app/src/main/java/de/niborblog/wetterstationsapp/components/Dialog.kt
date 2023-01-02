@@ -43,15 +43,7 @@ var isNetworksEmpty = mutableStateOf(false)
 @Composable
 fun DevicePairDialog(onClose: () -> Unit, openSettingsDialog: () -> Unit) {
 
-    //set BluetoothReceiver
-    /*val receiver = BluetoothReceiver()
-    val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
-    registerReceiver(LocalContext.current, receiver, filter, RECEIVER_EXPORTED)
-    //Scan devices that are not paired
-
-    bluetoothAdapter.startDiscovery()*/
-
-    //new Method
+    //Method for old way to connect With WIFI
     scanLeDevice()
 
     //show Dialog to show WetterStation Devices
@@ -232,4 +224,40 @@ fun DeviceItem(
         Text(text = "MAC: ${device.address}")
     }
     Log.d("BluetoothReceiver", device.name)
+}
+
+@Composable
+fun PermissionRequestDialog(onClose: () -> Unit) {
+    AlertDialog(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(450.dp),
+        onDismissRequest = {},
+        text = {
+            Column(modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center) {
+                Text(text = "Berechtigungen Erforderlich\n", fontSize = MaterialTheme.typography.titleMedium.fontSize, fontWeight = MaterialTheme.typography.titleMedium.fontWeight)
+                Text(text = "Bitte Akzeptieren sie die Folgenden Berechtigungen, um die App ordnungsgemäß auszuführen.\n Berechtigungen: Bluetooth, Standort")
+            }
+
+        }, buttons = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Button(onClick = onClose) {
+                    Text(text = "Schließen")
+                }
+                Button(onClick = onClose) {
+                    Text(text = "Akzeptieren")
+                }
+            }
+        })
+    if (discNetworks.isNotEmpty()){
+        isNetworksEmpty.value = true
+    }
 }
