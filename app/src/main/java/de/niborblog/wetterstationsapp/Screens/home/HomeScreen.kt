@@ -7,16 +7,20 @@
 package de.niborblog.wetterstationsapp.Screens
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.bluetooth.BluetoothDevice
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import de.niborblog.wetterstationsapp.Bluetooth.startScanning
 import de.niborblog.wetterstationsapp.Screens.home.HomeModel
 import de.niborblog.wetterstationsapp.components.AppBar
 import de.niborblog.wetterstationsapp.components.InDoor
@@ -37,6 +41,11 @@ fun HomeScreen(
     city: String,
     lang: String,
 ) {
+
+    /**
+     * Connect to WetterStation
+     */
+    startScanning(LocalContext.current, viewModel = viewModel)
     /**
      * Lade Wetter Daten
      */
@@ -57,12 +66,8 @@ fun HomeScreen(
         val month = LocalDateTime.ofEpochSecond(weather.data!!.location.localtime_epoch.toLong(), 0, ZoneOffset.UTC).monthValue
         val year = LocalDateTime.ofEpochSecond(weather.data!!.location.localtime_epoch.toLong(), 0, ZoneOffset.UTC).year
         val date = "$day, $dayOfMonth.$month.$year"
-        MainContent(weatherData = weather.data!!, city= city, dateString = date)
+        MainContent(weatherData = weather.data!!, city= city, dateString = date, viewModel = viewModel)
     }
-
-
-
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,6 +76,7 @@ fun MainContent(
     weatherData: WetterForecast,
     city: String,
     dateString: String,
+    viewModel: HomeModel
     ) {
 
     Scaffold(
@@ -91,7 +97,7 @@ fun MainContent(
             item {
                 /** TODO: show Wetterstation Data */
                 /** TODO: on Card Click -> show detailed Data */
-                InDoor()
+                InDoor(viewModel= viewModel)
             }
             item {
                 /** TODO: show Week Forecast */

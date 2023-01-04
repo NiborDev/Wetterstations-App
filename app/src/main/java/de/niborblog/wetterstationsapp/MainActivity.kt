@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
 import de.niborblog.wetterstationsapp.Bluetooth.*
+import de.niborblog.wetterstationsapp.Screens.home.HomeModel
 import de.niborblog.wetterstationsapp.components.BluetoothPermissions
 import de.niborblog.wetterstationsapp.navigation.WetterSNavigation
 import de.niborblog.wetterstationsapp.ui.theme.WetterstationsAppTheme
@@ -87,7 +88,6 @@ fun WetterStationsApp(
                 //Bluetooth configurations
                 CheckBluetoothStatus()
                 initializeBluetooth(LocalContext.current)
-                startScanning(LocalContext.current)
 
                 //Show Screen
                 WetterSNavigation()

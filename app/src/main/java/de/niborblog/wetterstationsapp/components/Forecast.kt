@@ -207,7 +207,7 @@ fun OutDoor(
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.sun),
-                    contentDescription = "svg",
+                    contentDescription = "Weather",
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary)
                 )
                 Spacer(
@@ -239,29 +239,5 @@ fun OutDoor(
                 .fillMaxWidth()
                 .padding(8.dp),
         )
-    }
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun InDoor(
-){
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
-    )
-    val coroutineScope = rememberCoroutineScope()
-    BottomSheetScaffold(
-        scaffoldState = bottomSheetScaffoldState,
-        sheetContent = {
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-            ) {
-                Text(text = "Hello from sheet")
-            }
-        }, sheetPeekHeight = 320.dp
-    ) {
-
     }
 }

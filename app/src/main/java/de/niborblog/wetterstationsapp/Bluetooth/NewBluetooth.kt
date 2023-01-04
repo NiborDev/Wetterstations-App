@@ -12,6 +12,8 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.util.Log
+import androidx.hilt.navigation.compose.hiltViewModel
+import de.niborblog.wetterstationsapp.Screens.home.HomeModel
 import java.util.*
 
 // Declare variables for Bluetooth objects and state
@@ -36,7 +38,7 @@ fun initializeBluetooth(context: Context) {
 }
 
 @SuppressLint("MissingPermission")
-fun startScanning(context: Context) {
+fun startScanning(context: Context, viewModel: HomeModel) {
     val scanCallback = object : ScanCallback() {
         @SuppressLint("MissingPermission")
         override fun onScanResult(callbackType: Int, result: ScanResult?) {
@@ -45,7 +47,7 @@ fun startScanning(context: Context) {
                 if (station.device.name == "WetterStation by M&R") {
                     bluetoothDevice = station.device
                     stopScanning()
-                    autoConnectToDevice(context)
+                    autoConnectToDevice(context, viewModel = viewModel)
                 }
             }
         }
@@ -61,11 +63,11 @@ fun stopScanning() {
 
 // Connect to the device
 @SuppressLint("MissingPermission")
-fun autoConnectToDevice(context: Context) {
+fun autoConnectToDevice(context: Context, viewModel: HomeModel) {
     if (bluetoothDevice == null) {
         return
     }
-    bluetoothGatt = bluetoothDevice?.connectGatt(context, false, gattCallback)
+    bluetoothGatt = bluetoothDevice?.connectGatt(context, false, gattCallback(viewModel = viewModel))
 }
 
 @SuppressLint("MissingPermission")
@@ -113,7 +115,7 @@ fun enableHumidityNotify() {
 }
 
 // Callback for handling events related to the Bluetooth GATT
-private val gattCallback = object : BluetoothGattCallback() {
+class gattCallback(private val viewModel: HomeModel) : BluetoothGattCallback() {
     @SuppressLint("MissingPermission")
     override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
         super.onConnectionStateChange(gatt, status, newState)
@@ -131,6 +133,7 @@ private val gattCallback = object : BluetoothGattCallback() {
         }
     }
 
+    @SuppressLint("MissingPermission")
     override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
         super.onServicesDiscovered(gatt, status)
         if (status != BluetoothGatt.GATT_SUCCESS) {
@@ -140,14 +143,13 @@ private val gattCallback = object : BluetoothGattCallback() {
         if (service == null) {
             return
         }
-        temperatureCharacteristic =
-            service.getCharacteristic(UUID.fromString(temperatureCharacteristicUuid))
-        Log.i("CHARACTERISTIC_DATA", "Characteristic: $temperatureCharacteristicUuid")
+        temperatureCharacteristic = service.getCharacteristic(UUID.fromString(temperatureCharacteristicUuid))
         humidityCharacteristic = service.getCharacteristic(UUID.fromString(humidityCharacteristicUuid))
-        Log.i("CHARACTERISTIC_DATA", "Characteristic: $humidityCharacteristicUuid")
+
         enableTemperatureNotify()
         enableHumidityNotify()
-
+        Log.i("CHARACTERISTIC_DATA", "Characteristic: $temperatureCharacteristicUuid")
+        Log.i("CHARACTERISTIC_DATA", "Characteristic: $humidityCharacteristicUuid")
     }
 
     override fun onCharacteristicChanged(
@@ -155,22 +157,26 @@ private val gattCallback = object : BluetoothGattCallback() {
         characteristic: BluetoothGattCharacteristic?
     ) {
         super.onCharacteristicChanged(gatt, characteristic)
-        if (characteristic?.uuid == UUID.fromString(temperatureCharacteristicUuid)) {
-            // Update the temperature value on the UI
-            if (characteristic != null) {
-                val data = characteristic.value
-                val dataString = String(data)
-                //TODO: UI Designen und entsprechend updaten
-                Log.d("CHARACTERISTIC_DATA", "UUID: $temperatureCharacteristicUuid data: $dataString")
-            }
-        }
         if (characteristic?.uuid == UUID.fromString(humidityCharacteristicUuid)) {
+            Log.d("CHARACTERISTIC_UUID", "HUMIDITY")
             // Update the humidity value on the UI
             if (characteristic != null) {
                 val data = characteristic.value
                 val dataString = String(data)
                 //TODO: UI Designen und entsprechend updaten
-                Log.d("CHARACTERISTIC_DATA", "UUID: $humidityCharacteristicUuid data: $dataString")
+                viewModel.humidityData.value = dataString
+                Log.d("CHARACTERISTIC_DATA_HUMIDITY", "UUID: $humidityCharacteristicUuid data: $dataString")
+            }
+        }
+        else if (characteristic?.uuid == UUID.fromString(temperatureCharacteristicUuid)) {
+            Log.d("CHARACTERISTIC_UUID", "TEMP")
+            // Update the temperature value on the UI
+            if (characteristic != null) {
+                val data = characteristic.value
+                val dataString = String(data)
+                //TODO: UI Designen und entsprechend updaten
+                viewModel.tempData.value = dataString
+                Log.d("CHARACTERISTIC_DATA_TEMP", "UUID: $temperatureCharacteristicUuid data: $dataString")
             }
         }
     }
