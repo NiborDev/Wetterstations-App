@@ -164,12 +164,13 @@ class gattCallback(private val viewModel: HomeModel) : BluetoothGattCallback() {
         if (service == null) {
             return
         }
-        humidityCharacteristic = service.getCharacteristic(UUID.fromString(humidityCharacteristicUuid))
+
         temperatureCharacteristic = service.getCharacteristic(UUID.fromString(temperatureCharacteristicUuid))
         coCharacteristic = service.getCharacteristic(UUID.fromString(coCharacteristicUuid))
-        enableHumidityNotify()
+        humidityCharacteristic = service.getCharacteristic(UUID.fromString(humidityCharacteristicUuid))
         enableTemperatureNotify()
         enableCoNotify()
+        enableHumidityNotify()
     }
 
     override fun onCharacteristicChanged(
