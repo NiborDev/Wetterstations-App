@@ -23,13 +23,16 @@ private var bluetoothGatt: BluetoothGatt? = null
 private var bluetoothDevice: BluetoothDevice? = null
 private var temperatureCharacteristic: BluetoothGattCharacteristic? = null
 private var humidityCharacteristic: BluetoothGattCharacteristic? = null
+private var coCharacteristic: BluetoothGattCharacteristic? = null
 private var isConnected = false
 private var isTemperatureNotifyEnabled = false
 private var isHumidityNotifyEnabled = false
+private var isCoNotifyEnabled = false
 
 private val serviceUuid = "280e14dd-6d9f-48db-9282-948e27efea5a"
 private val temperatureCharacteristicUuid = "99448029-6429-4271-aff0-abe68bc84697"
 private val humidityCharacteristicUuid = "26b616ef-063e-42ec-984f-e49556831f4e"
+private val coCharacteristicUuid = "1b01902e-20df-4cb8-aba1-a1258ecb91f7"
 
 fun initializeBluetooth(context: Context) {
     val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -81,6 +84,7 @@ fun disconnectFromDevice() {
     bluetoothDevice = null
     temperatureCharacteristic = null
     humidityCharacteristic = null
+    coCharacteristic = null
     isConnected = false
 }
 
@@ -114,6 +118,21 @@ fun enableHumidityNotify() {
     isHumidityNotifyEnabled = true
 }
 
+// Enable notifications for the co characteristic
+@SuppressLint("MissingPermission")
+fun enableCoNotify() {
+    if (coCharacteristic == null) {
+        return
+    }
+    bluetoothGatt?.setCharacteristicNotification(coCharacteristic, true)
+    val descriptor = coCharacteristic?.getDescriptor(
+        UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
+    )
+    descriptor?.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+    bluetoothGatt?.writeDescriptor(descriptor)
+    isCoNotifyEnabled = true
+}
+
 // Callback for handling events related to the Bluetooth GATT
 class gattCallback(private val viewModel: HomeModel) : BluetoothGattCallback() {
     @SuppressLint("MissingPermission")
@@ -128,8 +147,10 @@ class gattCallback(private val viewModel: HomeModel) : BluetoothGattCallback() {
             isConnected = false
             temperatureCharacteristic = null
             humidityCharacteristic = null
+            coCharacteristic = null
             isTemperatureNotifyEnabled = false
             isHumidityNotifyEnabled = false
+            isCoNotifyEnabled = false
         }
     }
 
@@ -143,13 +164,12 @@ class gattCallback(private val viewModel: HomeModel) : BluetoothGattCallback() {
         if (service == null) {
             return
         }
-        temperatureCharacteristic = service.getCharacteristic(UUID.fromString(temperatureCharacteristicUuid))
         humidityCharacteristic = service.getCharacteristic(UUID.fromString(humidityCharacteristicUuid))
-
-        enableTemperatureNotify()
+        temperatureCharacteristic = service.getCharacteristic(UUID.fromString(temperatureCharacteristicUuid))
+        coCharacteristic = service.getCharacteristic(UUID.fromString(coCharacteristicUuid))
         enableHumidityNotify()
-        Log.i("CHARACTERISTIC_DATA", "Characteristic: $temperatureCharacteristicUuid")
-        Log.i("CHARACTERISTIC_DATA", "Characteristic: $humidityCharacteristicUuid")
+        enableTemperatureNotify()
+        enableCoNotify()
     }
 
     override fun onCharacteristicChanged(
@@ -163,7 +183,6 @@ class gattCallback(private val viewModel: HomeModel) : BluetoothGattCallback() {
             if (characteristic != null) {
                 val data = characteristic.value
                 val dataString = String(data)
-                //TODO: UI Designen und entsprechend updaten
                 viewModel.humidityData.value = dataString
                 Log.d("CHARACTERISTIC_DATA_HUMIDITY", "UUID: $humidityCharacteristicUuid data: $dataString")
             }
@@ -174,9 +193,18 @@ class gattCallback(private val viewModel: HomeModel) : BluetoothGattCallback() {
             if (characteristic != null) {
                 val data = characteristic.value
                 val dataString = String(data)
-                //TODO: UI Designen und entsprechend updaten
                 viewModel.tempData.value = dataString
                 Log.d("CHARACTERISTIC_DATA_TEMP", "UUID: $temperatureCharacteristicUuid data: $dataString")
+            }
+        }
+        if (characteristic?.uuid == UUID.fromString(coCharacteristicUuid)){
+            Log.d("CHARACTERISTIC_UUID", "CO")
+            // Update the co value on the UI
+            if (characteristic != null){
+                val data = characteristic.value
+                val dataString = String(data)
+                viewModel.coData.value = dataString
+                Log.d("CHARACTERISTIC_DATA_CO", "UUID: $coCharacteristicUuid data: $dataString")
             }
         }
     }
