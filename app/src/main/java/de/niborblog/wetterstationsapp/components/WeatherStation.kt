@@ -9,10 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
@@ -24,10 +21,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import de.niborblog.wetterstationsapp.Bluetooth.startScanning
 import de.niborblog.wetterstationsapp.R
 import de.niborblog.wetterstationsapp.Screens.home.HomeModel
+import de.niborblog.wetterstationsapp.dataStore
+import de.niborblog.wetterstationsapp.utils.formatDecimal
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,6 +58,26 @@ fun InDoor(
 fun DataUI(
     viewModel: HomeModel
 ) {
+    //get Datastore read preference for Temperature
+    val datastore = LocalContext.current.dataStore
+    val prefs by remember { datastore.data }.collectAsState(initial = null)
+    val temUnitKey = stringPreferencesKey("ddTempUnit")
+    var tempUnit: String = ""
+    prefs?.get(temUnitKey)?.also { tempUnit = it }
+
+    var unit = ""
+    if (tempUnit.equals("0")){ //°C ausgewählt
+        if (viewModel.tempData.value.isNotEmpty()) {
+            viewModel.tempData.value = viewModel.tempData.value.toDouble().roundToInt().toString()
+        }
+        unit = "°C"
+    }else {
+        if (viewModel.tempData.value.isNotEmpty()) {
+            viewModel.tempData.value = ( (viewModel.tempData.value.toDouble()*9/5) + 32).roundToInt().toString()
+        }
+        unit = "°F"
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -66,27 +87,26 @@ fun DataUI(
             modifier = Modifier.padding(4.dp),
             painter = painterResource(id = R.drawable.temp),
             title = "Temperatur",
-            value = viewModel.tempData, //TODO werte abändern
-            unit = "°C"
+            value = viewModel.tempData,
+            unit = unit
         )
         WeatherStationDataItem(
             modifier = Modifier.padding(8.dp),
             painter = painterResource(id = R.drawable.humidity),
             title = "Luftfeuchtigkeit",
-            value = viewModel.humidityData, //TODO werte abändern
+            value = viewModel.humidityData,
             unit = "%"
         )
         WeatherStationDataItem(
             modifier = Modifier.padding(8.dp),
             painter = painterResource(id = R.drawable.humidity),
             title = "CO",
-            value = viewModel.coData, //TODO werte abändern
+            value = viewModel.coData,
             unit = "PPM"
         )
     }
 
 }
-//TODO: Composable für Daten erstellen!
 
 @Composable
 fun WeatherStationDataItem(

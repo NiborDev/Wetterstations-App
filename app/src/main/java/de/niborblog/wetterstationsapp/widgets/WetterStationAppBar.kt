@@ -21,7 +21,10 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import de.niborblog.wetterstationsapp.R
+import de.niborblog.wetterstationsapp.Screens.Settings.SettingsScreen
+import de.niborblog.wetterstationsapp.Screens.destinations.SettingsScreenDestination
 
 /**
  *
@@ -36,6 +39,7 @@ import de.niborblog.wetterstationsapp.R
 
 @Composable
 fun AppBar(
+    navigator: DestinationsNavigator,
     title: String = "WetterStations App",
     city: String = "Haiger",
     date: String = "Today, 08.12.2022",
@@ -74,7 +78,9 @@ fun AppBar(
             Row() {
                 AddNewDeviceButton(context = LocalContext.current)
                 IconButton(
-                    onClick = { }
+                    onClick = {
+                        navigator.navigate(SettingsScreenDestination())
+                    }
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.menu),

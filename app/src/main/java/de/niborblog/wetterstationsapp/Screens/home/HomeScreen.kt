@@ -26,11 +26,13 @@ import de.niborblog.wetterstationsapp.components.AppBar
 import de.niborblog.wetterstationsapp.components.InDoor
 import de.niborblog.wetterstationsapp.components.OutDoor
 import de.niborblog.wetterstationsapp.data.DataOrException
+import de.niborblog.wetterstationsapp.dataStore
 import de.niborblog.wetterstationsapp.model.Forecast.WetterForecast
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.TextStyle
 import java.util.*
+
 
 @SuppressLint("UnrememberedMutableState")
 @Destination
@@ -66,13 +68,14 @@ fun HomeScreen(
         val month = LocalDateTime.ofEpochSecond(weather.data!!.location.localtime_epoch.toLong(), 0, ZoneOffset.UTC).monthValue
         val year = LocalDateTime.ofEpochSecond(weather.data!!.location.localtime_epoch.toLong(), 0, ZoneOffset.UTC).year
         val date = "$day, $dayOfMonth.$month.$year"
-        MainContent(weatherData = weather.data!!, city= city, dateString = date, viewModel = viewModel)
+        MainContent(weatherData = weather.data!!, city= city, dateString = date, viewModel = viewModel, navigator = navigator)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainContent(
+    navigator: DestinationsNavigator,
     weatherData: WetterForecast,
     city: String,
     dateString: String,
@@ -81,7 +84,7 @@ fun MainContent(
 
     Scaffold(
         topBar = {
-            AppBar(city = city, date = dateString)
+            AppBar(city = city, date = dateString, navigator = navigator)
         }
     ) { innerPadding ->
         LazyColumn(
@@ -91,16 +94,15 @@ fun MainContent(
                 .fillMaxHeight()
         ){
             item {
-                /** TODO: show Today's Weather */
+                /** show Today's Weather */
                 OutDoor(weatherData)
             }
             item {
-                /** TODO: show Wetterstation Data */
-                /** TODO: on Card Click -> show detailed Data */
+                /** show Wetterstation Data */
                 InDoor(viewModel= viewModel)
             }
             item {
-                /** TODO: show Week Forecast */
+                /** TODO: show more Details from API */
             }
         }
     }

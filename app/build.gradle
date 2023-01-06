@@ -130,4 +130,8 @@ dependencies {
 
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1"
 
+    //Preferences DataStore
+    implementation "com.github.JamalMulla:ComposePrefs3:1.0.3"
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
+
 }

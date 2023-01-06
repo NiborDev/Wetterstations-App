@@ -20,6 +20,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.AndroidEntryPoint
 import de.niborblog.wetterstationsapp.Bluetooth.*
 import de.niborblog.wetterstationsapp.Screens.home.HomeModel
@@ -29,6 +33,11 @@ import de.niborblog.wetterstationsapp.ui.theme.WetterstationsAppTheme
 
 @SuppressLint("StaticFieldLeak")
 var context: Context? = null;
+
+//create Preference DataStore
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings" )
+
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
@@ -54,6 +63,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         //show Animation
         installSplashScreen()
         setContent()
