@@ -17,6 +17,8 @@ import javax.inject.Inject
 class HomeModel @Inject constructor(private val repository: WetterRepository) : ViewModel() {
     val humidityData = mutableStateOf("");
     val tempData = mutableStateOf("");
+    val tempDataF = mutableStateOf("");
+    val uiTemp = mutableStateOf("");
     val coData = mutableStateOf("");
     suspend fun getWeatherForecastData(city: String, lang: String = "en"): DataOrException<WetterForecast, Boolean, Exception> {
         return repository.getWeatherForecast(cityQuery = city, lang = lang)

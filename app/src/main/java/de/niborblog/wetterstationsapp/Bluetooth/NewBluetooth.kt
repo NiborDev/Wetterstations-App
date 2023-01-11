@@ -16,6 +16,7 @@ import de.niborblog.wetterstationsapp.Screens.home.HomeModel
 import de.niborblog.wetterstationsapp.components.discoveredDevices
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.math.roundToInt
 
 
 // Declare variables for Bluetooth objects and state
@@ -280,8 +281,13 @@ class gattCallback(private val viewModel: HomeModel) : BluetoothGattCallback() {
             if (characteristic != null) {
                 val data = characteristic.value
                 val dataString = String(data)
-                viewModel.tempData.value = dataString
-                Log.d("CHARACTERISTIC_DATA_TEMP", "UUID: $temperatureCharacteristicUuid data: $dataString")
+                val dataFString = ((dataString.toDouble() * 9 / 5) + 32).roundToInt().toString() //calc C to F
+                if (!viewModel.tempData.value.equals(dataString)){
+                    viewModel.tempData.value =  dataString
+                    viewModel.tempDataF.value = dataFString //Fahrenheit value
+                    Log.d("CHARACTERISTIC_DATA_TEMP", "UUID: $temperatureCharacteristicUuid data: $dataString, $dataFString")
+                }
+                //DO nothing, because Value is the same
             }
         }
         if (characteristic?.uuid == UUID.fromString(coCharacteristicUuid)){
@@ -290,7 +296,8 @@ class gattCallback(private val viewModel: HomeModel) : BluetoothGattCallback() {
             if (characteristic != null){
                 val data = characteristic.value
                 val dataString = String(data)
-                viewModel.coData.value = dataString
+                val dataToDouble = dataString.toDouble().roundToInt().toString()
+                viewModel.coData.value = dataToDouble
                 Log.d("CHARACTERISTIC_DATA_CO", "UUID: $coCharacteristicUuid data: $dataString")
             }
         }

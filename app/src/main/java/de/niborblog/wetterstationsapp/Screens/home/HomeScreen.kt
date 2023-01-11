@@ -25,6 +25,7 @@ import de.niborblog.wetterstationsapp.Screens.home.HomeModel
 import de.niborblog.wetterstationsapp.components.AppBar
 import de.niborblog.wetterstationsapp.components.InDoor
 import de.niborblog.wetterstationsapp.components.OutDoor
+import de.niborblog.wetterstationsapp.components.weaterDetails
 import de.niborblog.wetterstationsapp.data.DataOrException
 import de.niborblog.wetterstationsapp.dataStore
 import de.niborblog.wetterstationsapp.model.Forecast.WetterForecast
@@ -103,6 +104,7 @@ fun MainContent(
             }
             item {
                 /** TODO: show more Details from API */
+                weaterDetails(weather = weatherData)
             }
         }
     }

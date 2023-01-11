@@ -5,6 +5,7 @@
 
 package de.niborblog.wetterstationsapp.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
@@ -15,19 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.lifecycle.ViewModel
 import de.niborblog.wetterstationsapp.Bluetooth.startScanning
 import de.niborblog.wetterstationsapp.R
 import de.niborblog.wetterstationsapp.Screens.home.HomeModel
 import de.niborblog.wetterstationsapp.dataStore
-import de.niborblog.wetterstationsapp.utils.formatDecimal
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,6 +30,9 @@ import kotlin.math.roundToInt
 fun InDoor(
     viewModel: HomeModel
 ) {
+    val isExpanded = remember {
+        mutableStateOf(false)
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -50,6 +48,26 @@ fun InDoor(
         ) {
             Heading(viewModel = viewModel)
             DataUI(viewModel = viewModel)
+            if (isExpanded.value){
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = "CO Konzentrationen Überblick")
+                    Text(text = "0-9 ppm: Keine Gefahr\n9-35ppm Niedrige Gefahr\n35-200 ppm: Mittlere Gefahr\n200-400 ppm: Hohe Gefahr\n>400 ppm: Sehr hohe Gefahr")
+                    Icon(painter = painterResource(id = R.drawable.circle_chevron_up), contentDescription = "expand", modifier = Modifier.clickable { isExpanded.value = false  })
+                }
+            }else{
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(painter = painterResource(id = R.drawable.circle_chevron_down), contentDescription = "expand", modifier = Modifier.clickable { isExpanded.value = true  })
+                }
+            }
+
         }
     }
 }
@@ -66,14 +84,18 @@ fun DataUI(
     prefs?.get(temUnitKey)?.also { tempUnit = it }
 
     var unit = ""
-    if (tempUnit.equals("0")){ //°C ausgewählt
-        if (viewModel.tempData.value.isNotEmpty()) {
-            viewModel.tempData.value = viewModel.tempData.value.toDouble().roundToInt().toString()
+    val value: String = viewModel.tempData.value
+    val tempF: String = viewModel.tempDataF.value
+    val uiTemp = viewModel.uiTemp.value
+    if (tempUnit.equals("0")) { //°C ausgewählt
+        if (value.isNotEmpty()) {
+            viewModel.uiTemp.value = value.toDouble().roundToInt().toString()
         }
         unit = "°C"
-    }else {
-        if (viewModel.tempData.value.isNotEmpty()) {
-            viewModel.tempData.value = ( (viewModel.tempData.value.toDouble()*9/5) + 32).roundToInt().toString()
+    } else {
+        if (tempF.isNotEmpty()) {
+            //Fahrenheit value nehmen
+            viewModel.uiTemp.value = tempF.toDouble().roundToInt().toString()
         }
         unit = "°F"
     }
@@ -87,7 +109,7 @@ fun DataUI(
             modifier = Modifier.padding(4.dp),
             painter = painterResource(id = R.drawable.temp),
             title = "Temperatur",
-            value = viewModel.tempData,
+            value = viewModel.uiTemp,
             unit = unit
         )
         WeatherStationDataItem(
