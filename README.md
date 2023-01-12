@@ -19,7 +19,6 @@ Dafür verwendet die App die WeatherAPI (https://www.weatherapi.com/).
 Um mit der Wetterstation-App zu verwenden, benötigen Sie Folgendes:
 - Einen ESP32 Mikrocontroller mit den erforderlichen Sensoren zur Messung von Luftfeuchtigkeit, Temperatur und CO-Gehalt
 - Eine Internetverbindung, um auf WeatherAPI zugreifen zu können
-Sobald Sie alles haben, können Sie die Wetterstation-App aus dem PlayStore herunterladen und sie mit Ihrem ESP32 verbinden.
 Die App wird automatisch die aktuellen Wetterdaten sowohl von Ihrem ESP32 als auch von WeatherAPI abrufen und anzeigen.
 
 ## Bibliotheken
