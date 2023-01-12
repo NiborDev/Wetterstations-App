@@ -21,3 +21,11 @@ Um mit der Wetterstation-App zu verwenden, benötigen Sie Folgendes:
 - Eine Internetverbindung, um auf WeatherAPI zugreifen zu können
 Sobald Sie alles haben, können Sie die Wetterstation-App aus dem PlayStore herunterladen und sie mit Ihrem ESP32 verbinden.
 Die App wird automatisch die aktuellen Wetterdaten sowohl von Ihrem ESP32 als auch von WeatherAPI abrufen und anzeigen.
+
+## Bibliotheken
+- https://github.com/JamalMulla/ComposePrefs
+- https://github.com/airbnb/lottie-android/
+- https://github.com/google/accompanist
+- https://github.com/raamcosta/compose-destinations
+- https://github.com/square/retrofit
+- https://github.com/coil-kt/coil
