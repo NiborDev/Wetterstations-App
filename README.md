@@ -16,7 +16,7 @@ Dafür verwendet die App die WeatherAPI (https://www.weatherapi.com/).
 
 ## Einrichtung
 
-###Destinations erstellen
+### Destinations erstellen
 ![Screenshot_20230112_180123](https://user-images.githubusercontent.com/38883662/212132181-d337de67-0e77-4faf-ba22-236070dee9e4.png)
 ![Screenshot_20230112_175923](https://user-images.githubusercontent.com/38883662/212132174-2cc12424-43d0-4ac2-9784-3a7fe4df7a96.png)
 
